@@ -113,6 +113,8 @@ canvas{max-width:420px;}
 
 <script>
 
+<script>
+
 const cityBaseAQI = {
 Delhi:180, Mumbai:150,
 NewYork:90, London:80,
@@ -156,53 +158,59 @@ let electricity = parseFloat(document.getElementById("electricity").value)||0;
 let ac = parseFloat(document.getElementById("ac").value)||0;
 let selectedYear = parseInt(document.getElementById("yearSlider").value);
 
-let growthFactor = (selectedYear - 2025) / 20; // 0 to 1
+// Reduced impact factors (more realistic)
+let transportImpact = vehicle * 0.6;
+let electricityImpact = electricity * 0.08;
+let coolingImpact = ac * 1.2;
+
+let yearlyFactor = (selectedYear - 2025) / 20; // smooth 0–1 scale
 
 let pollutionIncrease =
-(vehicle*2 + electricity*0.3 + ac*4) * growthFactor;
+(transportImpact + electricityImpact + coolingImpact) * yearlyFactor;
 
 let projectedAQI = baseAQI + pollutionIncrease;
 
+// Sustainable reduction (capped)
 let reduction = 0;
 document.querySelectorAll("input[type=checkbox]:checked")
 .forEach(cb => reduction += parseInt(cb.value));
-if(reduction > 50) reduction = 50;
+
+if(reduction > 40) reduction = 40;
 
 let sustainableAQI = projectedAQI * (1 - reduction/100);
 
-// Update line chart curves
+// Generate curve properly
 let currentData = [];
 let sustainableData = [];
 
 for(let year=2025; year<=2045; year+=5){
 let factor = (year-2025)/20;
-let futureAQI = baseAQI + (vehicle*2 + electricity*0.3 + ac*4)*factor;
+let futureAQI = baseAQI +
+(transportImpact + electricityImpact + coolingImpact) * factor;
+
 currentData.push(futureAQI);
-sustainableData.push(futureAQI*(1-reduction/100));
+sustainableData.push(futureAQI * (1 - reduction/100));
 }
 
 lineChart.data.datasets[0].data = currentData;
 lineChart.data.datasets[1].data = sustainableData;
 lineChart.update();
 
-// Normalize pie chart to percentage
-let transport = vehicle*2;
-let elec = electricity*0.3;
-let cool = ac*4;
-let urban = baseAQI*0.5;
+// Normalize pie chart
+let urbanImpact = baseAQI * 0.3;
 
-let total = transport + elec + cool + urban;
+let total = transportImpact + electricityImpact + coolingImpact + urbanImpact;
 
 pieChart.data.datasets[0].data = [
-(transport/total)*100,
-(elec/total)*100,
-(cool/total)*100,
-(urban/total)*100
+(transportImpact/total)*100,
+(electricityImpact/total)*100,
+(coolingImpact/total)*100,
+(urbanImpact/total)*100
 ];
 
 pieChart.update();
 
-// Health Impact
+// Risk classification (realistic AQI ranges)
 let riskLevel;
 if(projectedAQI > 300) riskLevel="Severe";
 else if(projectedAQI > 200) riskLevel="High";
@@ -211,11 +219,11 @@ else riskLevel="Low";
 
 document.getElementById("healthOutput").innerHTML=`
 City: ${city}<br>
-Year Selected: ${selectedYear}<br>
+Year: ${selectedYear}<br>
 Projected AQI: ${projectedAQI.toFixed(0)}<br>
 Sustainable AQI: ${sustainableAQI.toFixed(0)}<br>
-Respiratory Risk: ${(projectedAQI/4).toFixed(0)}%<br>
-Extreme Heat Days: ${(projectedAQI/8).toFixed(0)}
+Respiratory Risk: ${(projectedAQI/6).toFixed(0)}%<br>
+Extreme Heat Days: ${(projectedAQI/15).toFixed(0)}
 `;
 
 let riskBox = document.getElementById("riskBox");
@@ -231,6 +239,9 @@ riskBox.className="riskBox low";
 }
 
 simulate();
+
+</script>
+
 
 </script>
 
