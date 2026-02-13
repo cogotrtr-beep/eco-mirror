@@ -1,137 +1,279 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EcoMirror AI</title>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body {
+* {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
   color: white;
-  text-align: center;
+  overflow-x: hidden;
 }
 
 section {
-  padding: 80px 20px;
+  padding: 80px 8%;
 }
 
-h1 {
-  font-size: 3rem;
+h1, h2 {
+  margin-bottom: 20px;
 }
 
-button {
-  padding: 12px 25px;
+.hero {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hero h1 {
+  font-size: 3.5rem;
+  background: linear-gradient(to right, #00ffae, #00c6ff);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.btn {
   background: #00ffae;
+  padding: 12px 25px;
+  border-radius: 30px;
   border: none;
-  border-radius: 25px;
-  cursor: pointer;
   margin-top: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
 }
 
-button:hover {
+.btn:hover {
   transform: scale(1.05);
+  box-shadow: 0 0 20px #00ffae;
 }
 
-.stat {
-  font-size: 3rem;
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: rgba(255,255,255,0.08);
+  padding: 25px;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 0 20px rgba(0,255,174,0.4);
+}
+
+.stats {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.stat-box {
+  background: rgba(0,255,174,0.1);
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  flex: 1;
+}
+
+.stat-box h3 {
+  font-size: 2.5rem;
   color: #00ffae;
 }
 
-.sim-box {
+.charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
+.simulator {
+  background: rgba(255,255,255,0.08);
+  padding: 30px;
+  border-radius: 15px;
   max-width: 600px;
-  margin: auto;
 }
 
 input[type=range] {
   width: 100%;
+  margin: 15px 0;
 }
 
-canvas {
-  max-width: 600px;
-  margin: auto;
+.scenarios {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.green {
+  background: rgba(0,255,120,0.1);
+}
+
+.polluted {
+  background: rgba(255,0,0,0.1);
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  background: rgba(0,0,0,0.5);
 }
 </style>
 </head>
 
 <body>
 
-<section>
-  <h1>EcoMirror</h1>
-  <p>AI That Shows Your Future Earth</p>
+<section class="hero">
+  <h1>EcoMirror AI</h1>
+  <p>Visualising Tomorrow’s Environmental Reality</p>
+  <button class="btn" onclick="scrollToSection()">Explore Dashboard</button>
 </section>
 
-<section>
-  <h2>Impact Metrics</h2>
-  <div class="stat" id="counter1">0</div>
-  <p>% Behaviour Change Increase</p>
-</section>
-
-<section>
-  <h2>Future Emissions Projection</h2>
-  <canvas id="chart"></canvas>
-</section>
-
-<section>
-  <h2>Policy Simulator</h2>
-  <div class="sim-box">
-    <label>Renewable %</label>
-    <input type="range" id="renewable" min="0" max="100" value="40">
-    <span id="renewVal">40%</span>
-    <br><br>
-    <button onclick="simulate()">Simulate</button>
-    <h3 id="result"></h3>
+<section id="dashboard">
+  <h2>Key Impact Metrics</h2>
+  <div class="stats">
+    <div class="stat-box">
+      <h3 id="stat1">0</h3>
+      <p>% Behaviour Change Increase</p>
+    </div>
+    <div class="stat-box">
+      <h3 id="stat2">0</h3>
+      <p>% Climate Literacy Improvement</p>
+    </div>
+    <div class="stat-box">
+      <h3>80%</h3>
+      <p>Renewable Target</p>
+    </div>
+    <div class="stat-box">
+      <h3>65%</h3>
+      <p>Emission Reduction Goal</p>
+    </div>
   </div>
 </section>
 
+<section>
+  <h2>Climate Data Visualisation</h2>
+  <div class="charts">
+    <canvas id="lineChart"></canvas>
+    <canvas id="pieChart"></canvas>
+  </div>
+</section>
+
+<section>
+  <h2>Policy Intervention Simulator</h2>
+  <div class="simulator">
+    <label>Renewable Adoption (%)</label>
+    <input type="range" id="renewable" min="0" max="100" value="40">
+    <span id="renewVal">40%</span>
+
+    <label>Urban Green Expansion (%)</label>
+    <input type="range" id="green" min="0" max="100" value="20">
+    <span id="greenVal">20%</span>
+
+    <button class="btn" onclick="simulate()">Simulate Future</button>
+    <h3 id="simResult"></h3>
+  </div>
+</section>
+
+<section>
+  <h2>Two Possible Futures</h2>
+  <div class="scenarios">
+    <div class="card green">
+      <h3>🌱 Green Future</h3>
+      <p>Clean air, 80% renewables, biodiversity recovery.</p>
+    </div>
+    <div class="card polluted">
+      <h3>☠ Polluted Scenario</h3>
+      <p>Heat crisis, fossil dependency, ecosystem collapse.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  EcoMirror AI | Sustainability Hackathon MVP
+</footer>
+
 <script>
+// Scroll
+function scrollToSection(){
+  document.getElementById("dashboard").scrollIntoView({behavior:"smooth"});
+}
+
 // Counter animation
-let counter = document.getElementById("counter1");
-let count = 0;
-let target = 43;
+function animateValue(id, start, end, duration) {
+  let range = end - start;
+  let current = start;
+  let increment = end > start? 1 : -1;
+  let stepTime = Math.abs(Math.floor(duration / range));
+  let obj = document.getElementById(id);
+  let timer = setInterval(function() {
+    current += increment;
+    obj.textContent = current;
+    if (current == end) clearInterval(timer);
+  }, stepTime);
+}
 
-let interval = setInterval(() => {
-  if (count < target) {
-    count++;
-    counter.innerText = count;
-  } else {
-    clearInterval(interval);
-  }
-}, 30);
+animateValue("stat1",0,43,2000);
+animateValue("stat2",0,67,2000);
 
-// Chart
-new Chart(document.getElementById("chart"), {
+// Line Chart
+new Chart(document.getElementById("lineChart"), {
   type: "line",
   data: {
-    labels: ["2025", "2030", "2040", "2050"],
+    labels: ["2025","2030","2040","2050"],
     datasets: [{
       label: "Carbon Emissions (Gt)",
-      data: [35, 50, 70, 90],
+      data: [35,50,70,90],
       borderColor: "#00ffae",
-      backgroundColor: "rgba(0,255,174,0.3)",
-      fill: true
+      backgroundColor: "rgba(0,255,174,0.2)",
+      fill: true,
+      tension: 0.4
+    }]
+  },
+  options:{responsive:true}
+});
+
+// Pie Chart
+new Chart(document.getElementById("pieChart"), {
+  type: "pie",
+  data: {
+    labels: ["Renewable","Fossil","Nuclear","Other"],
+    datasets: [{
+      data: [40,35,15,10],
+      backgroundColor: ["#00ffae","#ff4d4d","#ffaa00","#00c6ff"]
     }]
   }
 });
 
-// Slider
-let slider = document.getElementById("renewable");
-let renewVal = document.getElementById("renewVal");
+// Simulator
+let renewable = document.getElementById("renewable");
+let green = document.getElementById("green");
 
-slider.oninput = function() {
-  renewVal.innerText = this.value + "%";
-};
+renewable.oninput = ()=> renewVal.innerText = renewable.value + "%";
+green.oninput = ()=> greenVal.innerText = green.value + "%";
 
-function simulate() {
-  let value = slider.value;
-  let reduction = value * 0.6;
-  document.getElementById("result").innerText =
-    "Projected Carbon Reduction: " + reduction.toFixed(1) + "%";
+function simulate(){
+  let reduction = renewable.value * 0.6 + green.value * 0.4;
+  simResult.innerText =
+  "Projected Carbon Reduction: " + reduction.toFixed(1) + "% by 2040";
 }
 </script>
 
 </body>
 </html>
+
