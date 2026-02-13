@@ -2,280 +2,242 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>EcoMirror AI - Advanced Simulation</title>
+<title>EcoMirror 2045 Simulator</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Segoe UI, sans-serif;
-}
-
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,sans-serif;}
 body{
   background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
   color:white;
   padding:40px 8%;
+  transition:0.5s;
 }
-
 h1{
-  font-size:2.8rem;
-  margin-bottom:15px;
+  font-size:2.5rem;
+  margin-bottom:20px;
   background:linear-gradient(to right,#00ffae,#00c6ff);
   -webkit-background-clip:text;
   color:transparent;
 }
-
-.section{ margin-top:60px; }
-
-.sim-box{
-  background:rgba(255,255,255,0.08);
-  padding:25px;
-  border-radius:15px;
-  max-width:900px;
-}
-
-input, select{
+.section{margin-top:50px;}
+input,select{
   width:100%;
-  margin:10px 0;
+  margin:8px 0;
   padding:8px;
   border-radius:6px;
   border:none;
 }
-
-.method-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:20px;
-  margin-top:20px;
-}
-
-.method-card{
-  background:rgba(255,255,255,0.1);
-  padding:20px;
-  border-radius:12px;
-  transition:0.3s;
-  cursor:pointer;
-}
-
-.method-card:hover{
-  transform:translateY(-6px);
-  box-shadow:0 0 15px rgba(0,255,174,0.4);
-}
-
-.method-card input{
-  width:auto;
-  margin-right:10px;
-}
-
-.btn{
+button{
   background:#00ffae;
   padding:10px 20px;
   border:none;
   border-radius:25px;
   cursor:pointer;
-  font-weight:bold;
+  margin-top:10px;
+}
+.toggle-group{
+  display:flex;
+  gap:15px;
+  flex-wrap:wrap;
+  margin-top:15px;
+}
+.toggle-group label{
+  background:rgba(255,255,255,0.1);
+  padding:8px 12px;
+  border-radius:8px;
+  cursor:pointer;
+}
+.table{
   margin-top:20px;
+  background:rgba(255,255,255,0.08);
+  padding:20px;
+  border-radius:10px;
 }
-
-.btn:hover{
-  box-shadow:0 0 15px #00ffae;
-}
-
 .charts{
   display:flex;
   flex-wrap:wrap;
   gap:40px;
-  margin-top:40px;
+  margin-top:30px;
 }
-
-canvas{
-  max-width:350px;
-  max-height:280px;
+canvas{max-width:380px;max-height:260px;}
+.risk{
+  margin-top:15px;
+  padding:10px;
+  border-radius:8px;
 }
-
-.insight{
-  margin-top:20px;
-  padding:15px;
-  border-radius:10px;
-  background:rgba(0,255,174,0.15);
-}
-
-.good{ background:rgba(0,255,120,0.2); }
-.risk{ background:rgba(255,0,0,0.2); }
+.high{background:rgba(255,0,0,0.3);}
+.moderate{background:rgba(255,165,0,0.3);}
+.low{background:rgba(0,255,0,0.3);}
 </style>
 </head>
 
 <body>
 
-<h1>EcoMirror AI</h1>
-<p>AI-Based Sustainable Future Simulation</p>
+<h1>EcoMirror – Your Area in 2045</h1>
 
 <div class="section">
-  <div class="sim-box">
 
-    <label>🌍 Select Country</label>
-    <select id="country">
-      <option value="india">India</option>
-      <option value="usa">USA</option>
-      <option value="germany">Germany</option>
-      <option value="china">China</option>
-    </select>
+<label>City</label>
+<select id="city">
+  <option value="delhi">Delhi</option>
+  <option value="bangalore">Bangalore</option>
+  <option value="mumbai">Mumbai</option>
+</select>
 
-    <label>🚗 Daily Car Usage (km)</label>
-    <input type="number" id="carUsage" value="20">
+<label>Vehicle Usage (km/day)</label>
+<input type="number" id="vehicle" value="20">
 
-    <label>⚡ Monthly Electricity Usage (kWh)</label>
-    <input type="number" id="electricityUsage" value="300">
+<label>Electricity Usage (kWh/month)</label>
+<input type="number" id="electricity" value="300">
 
-    <h3 style="margin-top:20px;">🌱 Select Sustainability Methods</h3>
+<label>AC Usage (hrs/day)</label>
+<input type="number" id="ac" value="6">
 
-    <div class="method-grid">
+<label>Diet Type</label>
+<select id="diet">
+  <option value="veg">Vegetarian</option>
+  <option value="nonveg">Non-Vegetarian</option>
+</select>
 
-      <div class="method-card">
-        <label>
-          <input type="checkbox" value="15">
-          Install Solar Panels (15% reduction)
-        </label>
-      </div>
+<label>Waste Habits</label>
+<select id="waste">
+  <option value="good">Segregates & Recycles</option>
+  <option value="poor">No Waste Segregation</option>
+</select>
 
-      <div class="method-card">
-        <label>
-          <input type="checkbox" value="10">
-          Use Public Transport (10% reduction)
-        </label>
-      </div>
+<h3 style="margin-top:20px;">🧠 What If Scenario</h3>
 
-      <div class="method-card">
-        <label>
-          <input type="checkbox" value="12">
-          Energy Efficient Appliances (12% reduction)
-        </label>
-      </div>
+<div class="toggle-group">
+  <label><input type="checkbox" value="15"> Switch to EV</label>
+  <label><input type="checkbox" value="10"> Plant 1M Trees</label>
+  <label><input type="checkbox" value="20"> Strict Emission Law</label>
+  <label><input type="checkbox" value="18"> 60% Renewable Energy</label>
+</div>
 
-      <div class="method-card">
-        <label>
-          <input type="checkbox" value="8">
-          EV Adoption (8% reduction)
-        </label>
-      </div>
+<button onclick="simulate()">Simulate 2045</button>
 
-      <div class="method-card">
-        <label>
-          <input type="checkbox" value="20">
-          100% Renewable Electricity (20% reduction)
-        </label>
-      </div>
+</div>
 
-    </div>
-
-    <button class="btn" onclick="simulate()">Simulate Future</button>
-
-    <h3 id="result"></h3>
-    <div id="futureBox" class="insight"></div>
-
-  </div>
+<div class="section table">
+  <h2>📊 Predictive Snapshot</h2>
+  <div id="output"></div>
 </div>
 
 <div class="section">
-  <h2>Environmental Visual Analytics</h2>
+  <h2>📈 Environmental Projection</h2>
   <div class="charts">
     <canvas id="lineChart"></canvas>
     <canvas id="pieChart"></canvas>
   </div>
 </div>
 
-<script>
+<div class="section">
+  <h2>🏥 Health Impact Estimator</h2>
+  <div id="health"></div>
+</div>
 
-const countryFactor = {
-  india:1.0,
-  usa:1.6,
-  germany:0.8,
-  china:1.4
-};
+<div id="riskBox" class="risk"></div>
+
+<script>
 
 let lineChart = new Chart(document.getElementById("lineChart"),{
   type:"line",
   data:{
-    labels:["2025","2030","2040","2050"],
+    labels:["2025","2030","2035","2040","2045"],
     datasets:[{
-      label:"Future Emission Index",
-      data:[40,50,60,75],
+      label:"AQI Projection",
+      data:[180,220,260,310,390],
       borderColor:"#00ffae",
-      backgroundColor:"rgba(0,255,174,0.2)",
-      fill:true,
-      tension:0.4
+      fill:false
     }]
   }
 });
 
 let pieChart = new Chart(document.getElementById("pieChart"),{
-  type:"doughnut",
+  type:"pie",
   data:{
-    labels:["Transport","Electricity","Other"],
+    labels:["Transport","Electricity","Food","Waste"],
     datasets:[{
-      data:[30,30,40],
-      backgroundColor:["#00ffae","#00c6ff","#ffaa00"]
+      data:[30,30,20,20],
+      backgroundColor:["#00ffae","#00c6ff","#ffaa00","#ff4d4d"]
     }]
   }
 });
 
 function simulate(){
 
-  let country = document.getElementById("country").value;
-  let factor = countryFactor[country];
+let vehicle = parseFloat(vehicle.value);
+let electricity = parseFloat(electricity.value);
+let ac = parseFloat(ac.value);
+let diet = diet.value;
+let waste = waste.value;
 
-  let car = parseFloat(document.getElementById("carUsage").value)||0;
-  let electricity = parseFloat(document.getElementById("electricityUsage").value)||0;
+let baseAQI = 180 + vehicle*2 + electricity*0.3 + ac*5;
+if(diet=="nonveg") baseAQI += 20;
+if(waste=="poor") baseAQI += 25;
 
-  let baseTransport = car * 0.2 * factor;
-  let baseElectricity = electricity * 0.5 * factor;
+let reduction=0;
+document.querySelectorAll(".toggle-group input:checked").forEach(cb=>{
+  reduction+=parseInt(cb.value);
+});
+if(reduction>60) reduction=60;
 
-  let reduction = 0;
+let futureAQI = baseAQI*(1-reduction/100);
+let sustainableAQI = futureAQI*0.5;
 
-  document.querySelectorAll(".method-card input:checked").forEach(cb=>{
-    reduction += parseFloat(cb.value);
-  });
+let tempRise = 1.2 + (futureAQI/200);
+let heatDays = 18 + futureAQI/10;
 
-  if(reduction > 60) reduction = 60; // cap
+document.getElementById("output").innerHTML=
+`
+<table width="100%">
+<tr><th>Metric</th><th>2025</th><th>2045 (Current Path)</th><th>2045 (If Sustainable)</th></tr>
+<tr><td>AQI</td><td>180</td><td>${futureAQI.toFixed(0)}</td><td>${sustainableAQI.toFixed(0)}</td></tr>
+<tr><td>Avg Temp</td><td>+1.2°C</td><td>+${tempRise.toFixed(1)}°C</td><td>+${(tempRise*0.6).toFixed(1)}°C</td></tr>
+<tr><td>Heatwave Days</td><td>18</td><td>${heatDays.toFixed(0)}</td><td>${(heatDays*0.5).toFixed(0)}</td></tr>
+</table>
+`;
 
-  let total = (baseTransport + baseElectricity) * (1 - reduction/100);
+lineChart.data.datasets[0].data=[180,220,260,310,futureAQI];
+lineChart.update();
 
-  document.getElementById("result").innerText =
-  "Estimated Annual Emission Impact: " + total.toFixed(2) + " tons CO₂";
+pieChart.data.datasets[0].data=[
+vehicle*2,
+electricity*0.3,
+(diet=="nonveg"?30:15),
+(waste=="poor"?30:10)
+];
+pieChart.update();
 
-  let futureTrend = [
-    total*0.9,
-    total*1.1,
-    total*1.3,
-    total*1.5
-  ];
+let asthmaRisk = futureAQI/5;
+let heatRisk = heatDays/2;
 
-  lineChart.data.datasets[0].data = futureTrend;
-  lineChart.update();
+document.getElementById("health").innerHTML=
+`
+Asthma Risk: ${asthmaRisk.toFixed(0)}% <br>
+Heat Stroke Risk: ${heatRisk.toFixed(0)}% <br>
+Water Shortage Days: ${(heatDays*0.8).toFixed(0)} days/year
+`;
 
-  pieChart.data.datasets[0].data = [
-    baseTransport*(1-reduction/100),
-    baseElectricity*(1-reduction/100),
-    30
-  ];
-  pieChart.update();
+let riskIndex = (futureAQI/5 + tempRise*10)/2;
+let riskBox=document.getElementById("riskBox");
 
-  let futureBox = document.getElementById("futureBox");
-
-  if(reduction >= 40){
-    futureBox.className="insight good";
-    futureBox.innerText="🌱 Good Future Path: Strong sustainable adoption leads to long-term environmental stability.";
-  }
-  else if(reduction < 15){
-    futureBox.className="insight risk";
-    futureBox.innerText="⚠ Risk Future: Low sustainability adoption may accelerate climate crisis.";
-  }
-  else{
-    futureBox.className="insight";
-    futureBox.innerText="⚖ Moderate Future: More sustainable methods can improve 2050 outlook.";
-  }
+if(riskIndex>70){
+  riskBox.className="risk high";
+  riskBox.innerText="Climate Risk Index: "+riskIndex.toFixed(0)+"/100 (High Risk)";
+  document.body.style.background="linear-gradient(135deg,#3a0000,#5c0000)";
+}
+else if(riskIndex>40){
+  riskBox.className="risk moderate";
+  riskBox.innerText="Climate Risk Index: "+riskIndex.toFixed(0)+"/100 (Moderate)";
+  document.body.style.background="linear-gradient(135deg,#4b3c00,#6b5200)";
+}
+else{
+  riskBox.className="risk low";
+  riskBox.innerText="Climate Risk Index: "+riskIndex.toFixed(0)+"/100 (Low Risk)";
+  document.body.style.background="linear-gradient(135deg,#0f2027,#203a43,#2c5364)";
+}
 
 }
 
@@ -283,5 +245,6 @@ function simulate(){
 
 </body>
 </html>
+
 
 
