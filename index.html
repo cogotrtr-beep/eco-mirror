@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>EcoMirror AI - Advanced MVP</title>
+<title>EcoMirror AI - Advanced Simulation</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -21,7 +21,7 @@ body{
 
 h1{
   font-size:2.8rem;
-  margin-bottom:20px;
+  margin-bottom:15px;
   background:linear-gradient(to right,#00ffae,#00c6ff);
   -webkit-background-clip:text;
   color:transparent;
@@ -33,7 +33,7 @@ h1{
   background:rgba(255,255,255,0.08);
   padding:25px;
   border-radius:15px;
-  max-width:800px;
+  max-width:900px;
 }
 
 input, select{
@@ -44,7 +44,30 @@ input, select{
   border:none;
 }
 
-input[type=range]{ width:100%; }
+.method-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+  margin-top:20px;
+}
+
+.method-card{
+  background:rgba(255,255,255,0.1);
+  padding:20px;
+  border-radius:12px;
+  transition:0.3s;
+  cursor:pointer;
+}
+
+.method-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 0 15px rgba(0,255,174,0.4);
+}
+
+.method-card input{
+  width:auto;
+  margin-right:10px;
+}
 
 .btn{
   background:#00ffae;
@@ -53,7 +76,7 @@ input[type=range]{ width:100%; }
   border-radius:25px;
   cursor:pointer;
   font-weight:bold;
-  margin-top:10px;
+  margin-top:20px;
 }
 
 .btn:hover{
@@ -78,6 +101,7 @@ canvas{
   border-radius:10px;
   background:rgba(0,255,174,0.15);
 }
+
 .good{ background:rgba(0,255,120,0.2); }
 .risk{ background:rgba(255,0,0,0.2); }
 </style>
@@ -86,7 +110,7 @@ canvas{
 <body>
 
 <h1>EcoMirror AI</h1>
-<p>AI-Powered Country-Based Future Climate Simulation</p>
+<p>AI-Based Sustainable Future Simulation</p>
 
 <div class="section">
   <div class="sim-box">
@@ -105,9 +129,46 @@ canvas{
     <label>⚡ Monthly Electricity Usage (kWh)</label>
     <input type="number" id="electricityUsage" value="300">
 
-    <label>🌱 Renewable Adoption (%)</label>
-    <input type="range" id="renewable" min="0" max="100" value="40">
-    <span id="renewVal">40%</span>
+    <h3 style="margin-top:20px;">🌱 Select Sustainability Methods</h3>
+
+    <div class="method-grid">
+
+      <div class="method-card">
+        <label>
+          <input type="checkbox" value="15">
+          Install Solar Panels (15% reduction)
+        </label>
+      </div>
+
+      <div class="method-card">
+        <label>
+          <input type="checkbox" value="10">
+          Use Public Transport (10% reduction)
+        </label>
+      </div>
+
+      <div class="method-card">
+        <label>
+          <input type="checkbox" value="12">
+          Energy Efficient Appliances (12% reduction)
+        </label>
+      </div>
+
+      <div class="method-card">
+        <label>
+          <input type="checkbox" value="8">
+          EV Adoption (8% reduction)
+        </label>
+      </div>
+
+      <div class="method-card">
+        <label>
+          <input type="checkbox" value="20">
+          100% Renewable Electricity (20% reduction)
+        </label>
+      </div>
+
+    </div>
 
     <button class="btn" onclick="simulate()">Simulate Future</button>
 
@@ -121,28 +182,25 @@ canvas{
   <h2>Environmental Visual Analytics</h2>
   <div class="charts">
     <canvas id="lineChart"></canvas>
-    <canvas id="pieChart1"></canvas>
-    <canvas id="pieChart2"></canvas>
+    <canvas id="pieChart"></canvas>
   </div>
 </div>
 
 <script>
 
-// Country Base Emission Multipliers
 const countryFactor = {
-  india: 1.0,
-  usa: 1.6,
-  germany: 0.8,
-  china: 1.4
+  india:1.0,
+  usa:1.6,
+  germany:0.8,
+  china:1.4
 };
 
-// Charts
 let lineChart = new Chart(document.getElementById("lineChart"),{
   type:"line",
   data:{
     labels:["2025","2030","2040","2050"],
     datasets:[{
-      label:"Future Emissions Index",
+      label:"Future Emission Index",
       data:[40,50,60,75],
       borderColor:"#00ffae",
       backgroundColor:"rgba(0,255,174,0.2)",
@@ -152,30 +210,16 @@ let lineChart = new Chart(document.getElementById("lineChart"),{
   }
 });
 
-let pieChart1 = new Chart(document.getElementById("pieChart1"),{
-  type:"pie",
-  data:{
-    labels:["Transport","Electricity","Industry","Other"],
-    datasets:[{
-      data:[30,30,25,15],
-      backgroundColor:["#00ffae","#00c6ff","#ffaa00","#ff4d4d"]
-    }]
-  }
-});
-
-let pieChart2 = new Chart(document.getElementById("pieChart2"),{
+let pieChart = new Chart(document.getElementById("pieChart"),{
   type:"doughnut",
   data:{
-    labels:["Renewable","Fossil"],
+    labels:["Transport","Electricity","Other"],
     datasets:[{
-      data:[40,60],
-      backgroundColor:["#00ffae","#ff4d4d"]
+      data:[30,30,40],
+      backgroundColor:["#00ffae","#00c6ff","#ffaa00"]
     }]
   }
 });
-
-// Slider update
-renewable.oninput = () => renewVal.innerText = renewable.value + "%";
 
 function simulate(){
 
@@ -184,57 +228,53 @@ function simulate(){
 
   let car = parseFloat(document.getElementById("carUsage").value)||0;
   let electricity = parseFloat(document.getElementById("electricityUsage").value)||0;
-  let renewable = parseFloat(document.getElementById("renewable").value);
 
-  let transport = car * 0.2 * factor;
-  let electricityEmission = electricity * 0.5 * (1 - renewable/100) * factor;
+  let baseTransport = car * 0.2 * factor;
+  let baseElectricity = electricity * 0.5 * factor;
 
-  let total = transport + electricityEmission;
+  let reduction = 0;
+
+  document.querySelectorAll(".method-card input:checked").forEach(cb=>{
+    reduction += parseFloat(cb.value);
+  });
+
+  if(reduction > 60) reduction = 60; // cap
+
+  let total = (baseTransport + baseElectricity) * (1 - reduction/100);
 
   document.getElementById("result").innerText =
   "Estimated Annual Emission Impact: " + total.toFixed(2) + " tons CO₂";
 
-  // Update Line Chart
   let futureTrend = [
-    total * 0.9,
-    total * 1.1,
-    total * 1.3,
-    total * 1.5
+    total*0.9,
+    total*1.1,
+    total*1.3,
+    total*1.5
   ];
+
   lineChart.data.datasets[0].data = futureTrend;
   lineChart.update();
 
-  // Update Pie 1
-  pieChart1.data.datasets[0].data = [
-    transport,
-    electricityEmission,
-    25,
-    15
+  pieChart.data.datasets[0].data = [
+    baseTransport*(1-reduction/100),
+    baseElectricity*(1-reduction/100),
+    30
   ];
-  pieChart1.update();
+  pieChart.update();
 
-  // Update Pie 2
-  pieChart2.data.datasets[0].data = [
-    renewable,
-    100-renewable
-  ];
-  pieChart2.update();
-
-  // Future Logic
   let futureBox = document.getElementById("futureBox");
 
-  if(renewable > 70 && car < 30){
-    futureBox.className = "insight good";
-    futureBox.innerText =
-    "🌱 Good Future Path: High renewable adoption and reduced car usage lead to stable emissions and sustainable 2050 outlook.";
-  } else if(car > 60){
-    futureBox.className = "insight risk";
-    futureBox.innerText =
-    "⚠ Risk Future: High transport emissions may accelerate climate impact and increase long-term environmental stress.";
-  } else {
-    futureBox.className = "insight";
-    futureBox.innerText =
-    "⚖ Moderate Path: Further reduction in fossil energy and transport needed for strong positive impact.";
+  if(reduction >= 40){
+    futureBox.className="insight good";
+    futureBox.innerText="🌱 Good Future Path: Strong sustainable adoption leads to long-term environmental stability.";
+  }
+  else if(reduction < 15){
+    futureBox.className="insight risk";
+    futureBox.innerText="⚠ Risk Future: Low sustainability adoption may accelerate climate crisis.";
+  }
+  else{
+    futureBox.className="insight";
+    futureBox.innerText="⚖ Moderate Future: More sustainable methods can improve 2050 outlook.";
   }
 
 }
