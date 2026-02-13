@@ -12,12 +12,15 @@ body{
   color:white;
   padding:40px 8%;
 }
+
 h1{
   background:linear-gradient(to right,#00ffae,#00c6ff);
   -webkit-background-clip:text;
   color:transparent;
 }
+
 .section{margin-top:40px;}
+
 input,select{
   width:100%;
   padding:8px;
@@ -25,6 +28,7 @@ input,select{
   border:none;
   border-radius:6px;
 }
+
 button{
   padding:10px 20px;
   background:#00ffae;
@@ -33,28 +37,47 @@ button{
   cursor:pointer;
   margin-top:10px;
 }
+
 .panel{
-  margin-top:20px;
-  padding:20px;
-  border-radius:10px;
-  background:rgba(255,255,255,0.08);
+  margin-top:30px;
+  padding:25px;
+  border-radius:15px;
+  background:rgba(255,255,255,0.1);
 }
+
 .charts{
   display:flex;
+  justify-content:center;
+  align-items:center;
   flex-wrap:wrap;
   gap:40px;
   margin-top:20px;
 }
-canvas{max-width:420px;}
+
+.chart-box{
+  width:450px;
+  height:320px;
+  background:white;
+  border-radius:12px;
+  padding:15px;
+}
+
+canvas{
+  width:100% !important;
+  height:100% !important;
+}
+
 .riskBox{
   margin-top:15px;
   padding:12px;
   border-radius:8px;
   font-weight:bold;
+  text-align:center;
 }
-.high{background:rgba(255,0,0,0.3);}
-.moderate{background:rgba(255,165,0,0.3);}
-.low{background:rgba(0,255,0,0.3);}
+
+.high{background:rgba(255,0,0,0.4);}
+.moderate{background:rgba(255,165,0,0.4);}
+.low{background:rgba(0,255,0,0.4);}
 </style>
 </head>
 
@@ -100,10 +123,19 @@ canvas{max-width:420px;}
 
 <div class="section panel">
 <h2>AQI Projection (2025–2045)</h2>
+
 <div class="charts">
+
+<div class="chart-box">
 <canvas id="lineChart"></canvas>
+</div>
+
+<div class="chart-box">
 <canvas id="pieChart"></canvas>
 </div>
+
+</div>
+
 </div>
 
 <div class="section panel">
@@ -123,9 +155,7 @@ Tokyo:95, Beijing:200,
 Sydney:65, Toronto:70
 };
 
-const lineChart = new Chart(
-document.getElementById("lineChart"),
-{
+const lineChart = new Chart(document.getElementById("lineChart"),{
 type:"line",
 data:{
 labels:["2025","2030","2035","2040","2045"],
@@ -134,119 +164,111 @@ datasets:[
 label:"Current Path",
 data:[0,0,0,0,0],
 borderColor:"red",
-fill:false
+tension:0.4
 },
 {
 label:"Sustainable Path",
 data:[0,0,0,0,0],
-borderColor:"#00ffae",
-fill:false
+borderColor:"#00aa55",
+tension:0.4
 }
 ]
+},
+options:{
+responsive:true,
+maintainAspectRatio:false
 }
-}
-);
+});
 
-const pieChart = new Chart(
-document.getElementById("pieChart"),
-{
+const pieChart = new Chart(document.getElementById("pieChart"),{
 type:"pie",
 data:{
 labels:["Transport","Electricity","Cooling","Urban"],
 datasets:[
 {
 data:[25,25,25,25],
-backgroundColor:["#ff4d4d","#00c6ff","#ffaa00","#00ffae"]
+backgroundColor:["#ff4d4d","#00c6ff","#ffaa00","#00aa55"]
 }
 ]
+},
+options:{
+responsive:true,
+maintainAspectRatio:false
 }
-}
-);
+});
 
-const yearSlider = document.getElementById("yearSlider");
-const yearLabel = document.getElementById("yearLabel");
+const yearSlider=document.getElementById("yearSlider");
+const yearLabel=document.getElementById("yearLabel");
 
-yearSlider.addEventListener("input", function(){
-yearLabel.innerText = this.value;
+yearSlider.addEventListener("input",function(){
+yearLabel.innerText=this.value;
 simulate();
 });
 
-document.getElementById("simulateBtn").addEventListener("click", simulate);
+document.getElementById("simulateBtn").addEventListener("click",simulate);
 
 function simulate(){
 
-const city = document.getElementById("city").value;
-const baseAQI = cityBaseAQI[city];
+const city=document.getElementById("city").value;
+const baseAQI=cityBaseAQI[city];
 
-const vehicle = parseFloat(document.getElementById("vehicle").value) || 0;
-const electricity = parseFloat(document.getElementById("electricity").value) || 0;
-const ac = parseFloat(document.getElementById("ac").value) || 0;
-const selectedYear = parseInt(yearSlider.value);
+const vehicle=parseFloat(document.getElementById("vehicle").value)||0;
+const electricity=parseFloat(document.getElementById("electricity").value)||0;
+const ac=parseFloat(document.getElementById("ac").value)||0;
+const selectedYear=parseInt(yearSlider.value);
 
-// Natural growth (15% over 20 years)
-const naturalGrowth = baseAQI * 0.15;
-const factor = (selectedYear - 2025) / 20;
+const naturalGrowth=baseAQI*0.15;
+const factor=(selectedYear-2025)/20;
 
-// Personal impact (realistic scaling)
-const personalImpact =
-(vehicle*0.2 + electricity*0.02 + ac*0.8) * factor;
+const personalImpact=(vehicle*0.2+electricity*0.02+ac*0.8)*factor;
 
-const projectedAQI =
-baseAQI + (naturalGrowth * factor) + personalImpact;
+const projectedAQI=baseAQI+(naturalGrowth*factor)+personalImpact;
 
-// Sustainable reduction
-let reduction = 0;
+let reduction=0;
 document.querySelectorAll("input[type=checkbox]:checked")
-.forEach(cb => reduction += parseInt(cb.value));
+.forEach(cb=>reduction+=parseInt(cb.value));
+if(reduction>35) reduction=35;
 
-if(reduction > 35) reduction = 35;
-
-const sustainableAQI =
-projectedAQI * (1 - reduction/100);
+const sustainableAQI=projectedAQI*(1-reduction/100);
 
 // Update line chart
-let currentData = [];
-let sustainableData = [];
+let currentData=[];
+let sustainableData=[];
 
-for(let y=2025; y<=2045; y+=5){
-let f = (y-2025)/20;
-let future =
-baseAQI + (naturalGrowth*f) +
-((vehicle*0.2 + electricity*0.02 + ac*0.8)*f);
-
+for(let y=2025;y<=2045;y+=5){
+let f=(y-2025)/20;
+let future=baseAQI+(naturalGrowth*f)+((vehicle*0.2+electricity*0.02+ac*0.8)*f);
 currentData.push(future);
 sustainableData.push(future*(1-reduction/100));
 }
 
-lineChart.data.datasets[0].data = currentData;
-lineChart.data.datasets[1].data = sustainableData;
+lineChart.data.datasets[0].data=currentData;
+lineChart.data.datasets[1].data=sustainableData;
 lineChart.update();
 
-// Update pie chart (percentage)
-let transport = vehicle*0.2;
-let elec = electricity*0.02;
-let cool = ac*0.8;
-let urban = baseAQI*0.4;
+// Update pie chart
+let transport=vehicle*0.2;
+let elec=electricity*0.02;
+let cool=ac*0.8;
+let urban=baseAQI*0.4;
+let total=transport+elec+cool+urban;
 
-let total = transport+elec+cool+urban;
-
-pieChart.data.datasets[0].data = [
+pieChart.data.datasets[0].data=[
 (transport/total)*100,
 (elec/total)*100,
 (cool/total)*100,
 (urban/total)*100
 ];
-
 pieChart.update();
 
-// Health assessment
+// Health
 let riskLevel;
-if(projectedAQI <= 100) riskLevel="Low";
-else if(projectedAQI <= 200) riskLevel="Moderate";
-else if(projectedAQI <= 300) riskLevel="High";
+if(projectedAQI<=100) riskLevel="Low";
+else if(projectedAQI<=200) riskLevel="Moderate";
+else if(projectedAQI<=300) riskLevel="High";
 else riskLevel="Severe";
 
-document.getElementById("healthOutput").innerHTML = `
+document.getElementById("healthOutput").innerHTML=`
 City: ${city}<br>
 Year: ${selectedYear}<br><br>
 Projected AQI: ${projectedAQI.toFixed(0)}<br>
@@ -255,22 +277,18 @@ Respiratory Risk: ${(projectedAQI/6).toFixed(0)}%<br>
 Extreme Heat Days: ${(projectedAQI/15).toFixed(0)}
 `;
 
-const riskBox = document.getElementById("riskBox");
-riskBox.innerHTML = "Climate Risk Level: "+riskLevel;
+const riskBox=document.getElementById("riskBox");
+riskBox.innerHTML="Climate Risk Level: "+riskLevel;
 
-if(riskLevel==="Severe")
-riskBox.className="riskBox high";
-else if(riskLevel==="High")
-riskBox.className="riskBox moderate";
-else
-riskBox.className="riskBox low";
+if(riskLevel==="Severe") riskBox.className="riskBox high";
+else if(riskLevel==="High") riskBox.className="riskBox moderate";
+else riskBox.className="riskBox low";
 
 }
 
 simulate();
 
 });
-
 </script>
 
 </body>
