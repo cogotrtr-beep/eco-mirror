@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>EcoMirror Climate Intelligence</title>
+<title>EcoMirror – Climate Intelligence 2045</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -12,15 +12,12 @@ body{
   color:white;
   padding:40px 8%;
 }
-
 h1{
   background:linear-gradient(to right,#00ffae,#00c6ff);
   -webkit-background-clip:text;
   color:transparent;
 }
-
 .section{margin-top:40px;}
-
 input,select{
   width:100%;
   padding:8px;
@@ -28,7 +25,6 @@ input,select{
   border:none;
   border-radius:6px;
 }
-
 button{
   padding:10px 20px;
   background:#00ffae;
@@ -37,23 +33,19 @@ button{
   cursor:pointer;
   margin-top:10px;
 }
-
 .panel{
   margin-top:30px;
   padding:25px;
   border-radius:15px;
   background:rgba(255,255,255,0.1);
 }
-
 .charts{
   display:flex;
   justify-content:center;
-  align-items:center;
   flex-wrap:wrap;
   gap:40px;
   margin-top:20px;
 }
-
 .chart-box{
   width:450px;
   height:320px;
@@ -61,12 +53,10 @@ button{
   border-radius:12px;
   padding:15px;
 }
-
 canvas{
   width:100% !important;
   height:100% !important;
 }
-
 .riskBox{
   margin-top:15px;
   padding:12px;
@@ -74,7 +64,6 @@ canvas{
   font-weight:bold;
   text-align:center;
 }
-
 .high{background:rgba(255,0,0,0.4);}
 .moderate{background:rgba(255,165,0,0.4);}
 .low{background:rgba(0,255,0,0.4);}
@@ -112,7 +101,7 @@ canvas{
 <input type="range" id="yearSlider" min="2025" max="2045" value="2045">
 <div>Year: <span id="yearLabel">2045</span></div>
 
-<h3>Sustainable Actions</h3>
+<h3>Sustainability Actions</h3>
 <label><input type="checkbox" value="20"> Switch to EV</label><br>
 <label><input type="checkbox" value="15"> Renewable Expansion</label><br>
 <label><input type="checkbox" value="10"> Emission Policy</label><br>
@@ -122,8 +111,7 @@ canvas{
 </div>
 
 <div class="section panel">
-<h2>AQI Projection (2025–2045)</h2>
-
+<h2>AQI Projection</h2>
 <div class="charts">
 
 <div class="chart-box">
@@ -135,7 +123,6 @@ canvas{
 </div>
 
 </div>
-
 </div>
 
 <div class="section panel">
@@ -184,12 +171,10 @@ const pieChart = new Chart(document.getElementById("pieChart"),{
 type:"pie",
 data:{
 labels:["Transport","Electricity","Cooling","Urban"],
-datasets:[
-{
+datasets:[{
 data:[25,25,25,25],
 backgroundColor:["#ff4d4d","#00c6ff","#ffaa00","#00aa55"]
-}
-]
+}]
 },
 options:{
 responsive:true,
@@ -222,16 +207,16 @@ const factor=(selectedYear-2025)/20;
 
 const personalImpact=(vehicle*0.2+electricity*0.02+ac*0.8)*factor;
 
-const projectedAQI=baseAQI+(naturalGrowth*factor)+personalImpact;
+let projectedAQI=baseAQI+(naturalGrowth*factor)+personalImpact;
 
 let reduction=0;
 document.querySelectorAll("input[type=checkbox]:checked")
 .forEach(cb=>reduction+=parseInt(cb.value));
-if(reduction>35) reduction=35;
+if(reduction>50) reduction=50;
 
 const sustainableAQI=projectedAQI*(1-reduction/100);
 
-// Update line chart
+// Line graph update
 let currentData=[];
 let sustainableData=[];
 
@@ -239,18 +224,24 @@ for(let y=2025;y<=2045;y+=5){
 let f=(y-2025)/20;
 let future=baseAQI+(naturalGrowth*f)+((vehicle*0.2+electricity*0.02+ac*0.8)*f);
 currentData.push(future);
-sustainableData.push(future*(1-reduction/100));
+let sustainFuture=future*(1-(reduction/100)*f);
+sustainableData.push(sustainFuture);
 }
 
 lineChart.data.datasets[0].data=currentData;
 lineChart.data.datasets[1].data=sustainableData;
 lineChart.update();
 
-// Update pie chart
+// Pie chart reacts to sustainability
 let transport=vehicle*0.2;
 let elec=electricity*0.02;
 let cool=ac*0.8;
 let urban=baseAQI*0.4;
+
+transport*=(1-reduction/150);
+elec*=(1-reduction/180);
+cool*=(1-reduction/160);
+
 let total=transport+elec+cool+urban;
 
 pieChart.data.datasets[0].data=[
@@ -261,20 +252,22 @@ pieChart.data.datasets[0].data=[
 ];
 pieChart.update();
 
-// Health
+// Health based on sustainable AQI
+let finalAQI=sustainableAQI;
+
 let riskLevel;
-if(projectedAQI<=100) riskLevel="Low";
-else if(projectedAQI<=200) riskLevel="Moderate";
-else if(projectedAQI<=300) riskLevel="High";
+if(finalAQI<=100) riskLevel="Low";
+else if(finalAQI<=200) riskLevel="Moderate";
+else if(finalAQI<=300) riskLevel="High";
 else riskLevel="Severe";
 
 document.getElementById("healthOutput").innerHTML=`
 City: ${city}<br>
 Year: ${selectedYear}<br><br>
-Projected AQI: ${projectedAQI.toFixed(0)}<br>
-Sustainable AQI: ${sustainableAQI.toFixed(0)}<br><br>
-Respiratory Risk: ${(projectedAQI/6).toFixed(0)}%<br>
-Extreme Heat Days: ${(projectedAQI/15).toFixed(0)}
+Projected AQI (Current): ${projectedAQI.toFixed(0)}<br>
+Projected AQI (Sustainable): ${sustainableAQI.toFixed(0)}<br><br>
+Respiratory Risk: ${(finalAQI/6).toFixed(0)}%<br>
+Extreme Heat Days: ${(finalAQI/15).toFixed(0)}
 `;
 
 const riskBox=document.getElementById("riskBox");
@@ -293,6 +286,7 @@ simulate();
 
 </body>
 </html>
+
 
 
 
